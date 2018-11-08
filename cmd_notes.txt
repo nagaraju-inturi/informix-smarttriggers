@@ -1,0 +1,20 @@
+#From terminal 1>
+
+docker run -it --name iif_developer_edition --hostname demo --privileged -p 9088:9088 -p 9089:9089 -p 27017:27017 -p 27018:27018 -p 27883:27883 -e LICENSE=accept ibmcom/informix-developer-database:latest
+sudo apt-get update
+sudo apt-get install default-jdk
+#docker start iif_developer_edition
+
+#From terminal 2>
+docker cp BankMonitor.java iif_developer_edition:/tmp/
+docker cp schema.sql iif_developer_edition:/tmp/
+docker exec -it iif_developer_edition bash
+dbaccess - /tmp/schema.sql
+javac -classpath "/opt/ibm/informix/jdbc/lib/ifxjdbc.jar" /tmp/BankMonitor.java
+java -classpath "/opt/ibm/informix/jdbc/lib/ifxjdbc.jar:." BankMonitor
+
+#From terminal 1>
+dbaccess bank -
+insert into account values(1, 10);
+update account set balance=-10 where id=1;
+insert into account values(2, -20);
